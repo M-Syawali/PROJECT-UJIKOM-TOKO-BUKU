@@ -1,10 +1,14 @@
 @extends('layout.header')
 @section('content')
-<h3 class="h3 mb-0 text-gray-800"><strong>PAGES - TAMBAH PRODUCTS</strong></h3>
+<h3 class="h3 mb-0 text-gray-800"><strong>PAGES - TAMBAH TRANSACTIONS</strong></h3>
 <br>
 <div class="col-lg-12 grid-margin stretch-card">
     <div class="card">
-        <div class="card-body">         
+        <div class="card-body">       
+        <a href="{{ route('products.index') }}" 
+                    class="btn btn-outline-dark m-1"><i class="ti ti-arrow-left"></i> </a>
+                    <br>  
+                    <br>
             <form action="{{ route('transactions.store') }}" method="POST" enctype="multipart/form-data" id="transactionForm">
                 @csrf
                 <div class="form-group">
@@ -180,7 +184,7 @@
                     '<tr>' +
                     '<td>' + product.name + '</td>' +
                     '<td>' + product.price + '</td>' +
-                    '<td>' + product.qty + '</td>' +
+                    '<td><input type="number" class="form-control" value="' + product.qty + '" onchange="updateQty(this, ' + productId + ')" /></td>' +
                     '<td>' + formatRupiah(totalPerProduk) + '</td>' +
                     '<td><button type="button" class="btn btn-outline-danger" data-product-id="' + productId + '" onclick="removeProductFromTable(this)"><i class="ti ti-trash"></i></button></td>' +
                     '</tr>'
@@ -189,6 +193,23 @@
         }
 
         displayTotalHarga();
+    }
+
+    function updateQty(input, productId) {
+        var qty = parseInt($(input).val());
+        if (!isNaN(qty) && qty > 0) {
+            selectedProducts[productId].qty = qty;
+            displaySelectedProducts();
+        } else {
+            // Jika input tidak valid, tampilkan pesan kesalahan dan kembalikan ke nilai sebelumnya
+            $(input).val(selectedProducts[productId].qty);
+            Swal.fire({
+                title: 'Input tidak valid',
+                text: 'Harap masukkan nilai kuantitas yang valid.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
     }
 
     function validateAndSubmit() {

@@ -3,13 +3,25 @@
 <style>
     /* Font tabel */
     .table td {
-        font-size: 16px; /* Ukuran font */
+        font-size: 14px; /* Ukuran font */
     }
 
     .btn-action {
         margin-right: 10px;
     }
 </style>
+@if ($message = Session::get('success'))
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success Message',
+                        text: @json($message),
+                        confirmButtonText: 'OK'
+                    });
+                });
+            </script>
+        @endif
 <h1 class="h3 mb-4 text-gray-800"><strong>PAGES - TRANSACTIONS</strong></h1>
 <div class="col-lg-12 grid-margin stretch-card">
     <div class="card">
@@ -20,12 +32,6 @@
                 <a href="{{ url('transactions/create') }}" class="btn btn-outline-primary"><i class="ti ti-plus"></i>Tambah</a>
             @endif
                 <br><br>
-                @if(session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                        </div>
-                   
-                @endif
                 <br>
                 <div class="table-responsive">
                     <table class="table table-bordered text-nowrap" id="myTable" width="100%" cellspacing="0">
@@ -69,15 +75,15 @@
                                 <td>{{ $transactions[0]->created_at }}</td>
                                 <td>
                             @if (Auth::user()->role== 'admin')
-                            <a href="{{ route('transactions.edit', $transactions[0]->id) }}" class="btn btn-outline-primary m-1"><i class="ti ti-edit"></i></a>
-                            <a href="{{ route('transactions.destroy', $transactions[0]->id) }}"
+                            <a href="{{ route('transactions.edit', $transactions[0]->nomor_unik) }}" class="btn btn-outline-primary m-1"><i class="ti ti-edit"></i></a>
+                            <a href="{{ route('transactions.destroy', $transactions[0]->nomor_unik) }}"
                             class="btn btn-outline-danger m-1"
                             onclick="event.preventDefault();
                                           if (confirm('Apakah anda yakin ingin menghapus?')) {
-                                              document.getElementById('delete-form-{{ $transactions[0]->id }}').submit();
+                                              document.getElementById('delete-form-{{ $transactions[0]->nomor_unik }}').submit();
                                             }">
                                 <i class="ti ti-trash"></i>
-                                <form id="delete-form-{{ $transactions[0]->id }}" action="{{ route('transactions.destroy', $transactions[0]->id) }}"
+                                <form id="delete-form-{{ $transactions[0]->nomor_unik }}" action="{{ route('transactions.destroy', $transactions[0]->nomor_unik) }}"
                                 method="POST" style="display: none;">
                                 @method('DELETE')
                                 @csrf

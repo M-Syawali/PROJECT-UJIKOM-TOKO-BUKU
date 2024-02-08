@@ -15,9 +15,6 @@
             @if (Auth::user()->role == 'admin')
                 <a href="{{ url('products/create') }}" class="btn btn-outline-primary"><i class="ti ti-plus"></i> Tambah</a>
             @endif
-            @if (Auth::user()->role == 'admin')
-                <a href="{{ url('produk/pdf')}}" class="btn btn-outline-warning"><i class="ti ti-printer"></i> Print Data</a>
-            @endif
             @if (Auth::user()->role == 'owner')
                 <a href="{{ url('produk/pdf')}}" class="btn btn-outline-warning"><i class="ti ti-printer"></i> Print Data</a>
             @endif

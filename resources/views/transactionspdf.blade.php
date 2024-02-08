@@ -47,8 +47,6 @@
         <div class="divider"></div>
         <p style="font-size: 18px;">Bukti Transaksi Pembelian</p>
     </div>
-    
-   
     <p style="font-size: 14px;">Nama Pelanggan: {{ $transactions[0]->nama_pelanggan }}</p>
                     <p style="font-size: 14px;">Nama Produk:</p>
                     <ol>
@@ -56,7 +54,8 @@
                         @foreach ($transactions as $transaction)
                             @foreach ($transaction->products as $product)
                                 <li style="font-size: 14px;">
-                                    {{ $product->nama_produk }} - {{ $transaction->qty }} - Rp.{{ number_format($transaction->qty * $product->harga_produk, 0, ',', '.') }}
+                                    {{ $product->nama_produk }},
+                                     {{ $transaction->qty }} - Rp.{{ number_format($transaction->qty * $product->harga_produk, 0, ',', '.') }}
                                     <?php $totalHarga += $transaction->qty * $product->harga_produk; ?>
                                 </li>
                             @endforeach

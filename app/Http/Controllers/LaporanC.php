@@ -14,12 +14,13 @@ class LaporanC extends Controller {
     public function index(Request $request)
     {
         $subtitle = "Laporan Transaksi";
-        $transactionsM = TransactionsM::with('products')->get(); // Eager loading
+       $transactions = TransactionsM::with('products')->get();
 
         // Mengambil daftar produk untuk dropdown
         $products = ProductsM::all();
+        $groupedTransactions = $transactions->groupBy('nomor_unik');
 
-        return view('laporan', compact('subtitle', 'transactionsM', 'products'));
+        return view('laporan', compact('subtitle', 'transactions', 'products','groupedTransactions'));
     }
 
     public function filter(Request $request)
@@ -27,49 +28,23 @@ class LaporanC extends Controller {
         $subtitle = "Filter Transaksi";
         $startDate = $request->input('startDate');
         $endDate = $request->input('endDate');
-        $productName = $request->input('productName');
-    
-        $query = TransactionsM::with('products')
-            ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
-    
-        if (!empty($productName)) {
-            $query->whereHas('products', function ($q) use ($productName) {
-                $q->where('nama_produk', 'like', '%' . $productName . '%');
-            });
-        }
-    
-        $transactionsM = $query->get();
-    
-        // Mengambil daftar produk untuk dropdown
-        $products = ProductsM::all();
-    
-        return view('laporan', compact('subtitle', 'transactionsM', 'startDate', 'endDate', 'productName', 'products'));
+
+        $transactions = TransactionsM::whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])
+            ->get();
+
+        $groupedTransactions = $transactions->groupBy('nomor_unik');
+
+        return view('laporan', compact('subtitle', 'transactions', 'startDate', 'endDate', 'groupedTransactions'));
     }
 
     public function export(Request $request)
     {
-        $subtitle = "Filter Transaksi";
         $startDate = $request->input('startDate');
         $endDate = $request->input('endDate');
-        $productName = $request->input('productName');
-    
-        $query = TransactionsM::with('products')
-            ->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
-    
-        if (!empty($productName)) {
-            $query->whereHas('products', function ($q) use ($productName) {
-                $q->where('nama_produk', 'like', '%' . $productName . '%');
-            });
-        }
-    
-        $transactionsM = $query->get();
-    
-        // Mengambil daftar produk untuk dropdown
-        $products = ProductsM::all();
-        
-        $pdf = Pdf::loadView('transactions_pdf1', compact('subtitle', 'transactionsM', 'startDate', 'endDate', 'productName', 'products'));
+        $transactions = TransactionsM::with('products')->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59'])->get();
+        $groupedTransactions = $transactions->groupBy('nomor_unik');
+
+        $pdf = PDF::loadView('transactions_pdf1', compact('transactions', 'startDate', 'endDate', 'groupedTransactions'));
         return $pdf->stream();
     }
-    
- 
 }

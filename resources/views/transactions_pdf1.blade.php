@@ -16,90 +16,113 @@
 
     <!-- Custom Styles -->
     <style>
-        body {
-            font-family: Arial, arial;
+        @page {
+            size: landscape;
         }
 
-h3 {
-    text-align: center;
-    background-color: ;
-    color: #000000 ;
-    padding: 10px;
-}
+        body {
+            font-family: Arial, sans-serif;
+        }
 
-table {
-    width: 100%;
-    border: 1px solid #000000;
-    border-collapse: collapse;
-}
+        h3 {
+            text-align: center;
+            color: #000000;
+            padding: 10px;
+        }
 
-th, td {
-    border: 1px solid #000000;
-    padding: 10px;
-}
+        table {
+            width: 100%;
+            border: 1px solid #000000;
+            border-collapse: collapse;
+            font-size: 14px; /* Adjust the font size as needed */
+        }
 
-th {
-    background-color: #5D87FF;
-    color: #0000000;
-}
+        th, td {
+            border: 1px solid #000000;
+            padding: 5px;
+        }
 
-tr:nth-child(even) {
-    background-color: #ffffff; /* Warna latar belakang baris genap */
-}
+        th {
+            background-color: #5D87FF;
+            color: #000000;
+        }
 
-tr:hover {
+        tr:nth-child(even) {
+            background-color: #ffffff;
+        }
+
+        tr:hover {
             background-color: #000000;
+        }
+        .total-section {
+            margin-top: 20px;
+            text-align: right;
+            font-weight: bold;
+        }
+
+        .signature-section {
+            margin-top: 50px;
         }
     </style>
 </head>
 <body>
-    <h3>DAFTAR TRANSAKSI BOOK STORE</h3>
-    <table id="">
+    <h3>DAFTAR TRANSAKSI</h3>
+    <table id="myTable" class="table table-bordered table-striped">
         <thead>
             <tr>
+                <th>No</th>
                 <th>Nomor Unik</th>
                 <th>Nama Pelanggan</th>
-                <th>Nama Produk</th>
-                <th>Harga Produk</th>
-                <th>Qty</th>
-                <th>Total Harga</th>
+                <th>Produk</th>
+                <th>Total Harga</th> 
                 <th>Uang Bayar</th>
                 <th>Uang Kembali</th>
-                <th>Tanggal</th>
+                <th>Waktu Transaksi</th>
             </tr>
         </thead>
         <tbody>
-        @php
-                $totalHargaProduk = 0; // Initialize the total harga_produk variable
-            @endphp
-            @foreach ($transactionsM as $data)
-            <tr>
-                <td>{{ $data->nomor_unik }}</td>
-                <td>{{ $data->nama_pelanggan }}</td>
-                <td>{{ $data->products->nama_produk }}</td>
-                <td>{{ $data->products->harga_produk }}</td>
-                <td>{{ $data->qty }}</td>
-                <td>{{ number_format ($data->total_harga, 0, ',', ',') }}</td>
-                <td>{{ number_format ($data->uang_bayar, 0, ',', ',') }}</td>
-                <td>{{ number_format ($data->uang_kembali, 0, ',', ',') }}</td>
-                <td>{{ $data->created_at }}</td>
-            </tr>
-            @php
-                $totalHargaProduk += $data->products->harga_produk * $data->qty; // Accumulate the total harga_produk
-            @endphp
-                @endforeach
+            <?php $nomor_unik = 1; $grandTotal = 0; ?>
+            @forelse($groupedTransactions as $transactions)
+                <tr>
+                    <td>{{ $loop->iteration }}</td>
+                    <td>{{ $transactions[0]->nomor_unik }}</td>
+                    <td>{{ $transactions[0]->nama_pelanggan }}</td>
+                    <td>
+                        <ol>
+                            <?php $totalHarga = 0; ?>
+                            @foreach ($transactions as $transaction)
+                                <li>
+                                    @foreach ($transaction->products as $product)
+                                        {{ $product->nama_produk }} - {{ $transaction->qty }} - Rp.{{ number_format($transaction->qty * $product->harga_produk, 0, ',', '.') }}
+                                        <?php $totalHarga += $transaction->qty * $product->harga_produk; ?>
+                                    @endforeach
+                                </li>
+                            @endforeach
+                        </ol>
+                    </td>                                                                                     
+                    <td>Rp.{{ number_format($totalHarga, 0, ',', '.') }}</td> 
+                    <td>Rp.{{ number_format($transactions[0]->uang_bayar, 0, ',', '.') }}</td>
+                    <td>Rp.{{ number_format($transactions[0]->uang_kembali, 0, ',', '.') }}</td>
+                    <td>{{ $transactions[0]->created_at }}</td>
+                </tr>
+                <?php $grandTotal += $totalHarga; ?>
+            @empty
+                <tr>
+                    <td colspan="9">Tidak Ada Data Transaksi</td>
+                </tr>
+            @endforelse
         </tbody>
+    </table>
+    <div class="total-section">
+        <p>Total Transaksi: Rp.{{ number_format($grandTotal, 0, ',', '.') }}</p>
+    </div>
 
-    </table>
-    <br>
-    <table>
-    <tfoot>
-            <tr>
-                <td>Total Keseluruhan Harga Produk :</td>
-                <td colspan="3">Rp. {{ number_format ($totalHargaProduk, 0, ',', ',') }}</td>
-            </tr>
-        </tfoot>
-    </table>
+    <!-- Additional Information -->
+    <div class="signature-section">
+        <p>Printed by: {{ Auth::user()->nama }}</p>
+        <p>Date: <?php echo date("Y-m-d H:i:s"); ?></p>
+    </div>
+
     <script>
         $(document).ready(function() {
             $('#myTable').DataTable();

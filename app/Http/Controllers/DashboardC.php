@@ -23,14 +23,13 @@ class DashboardC extends Controller
     public function getTodayDate()
     {
         $todayDate = Carbon::now()->format('d/m/y');
-
+X
         return $todayDate;
     }
 
     public function index()
     {
         $subtitle = "Dashboard Pages";
-
         $todayDetails = $this->getTodayDetails();
         $todayDate = $this->getTodayDate();
 

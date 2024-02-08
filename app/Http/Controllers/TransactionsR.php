@@ -51,30 +51,17 @@ class TransactionsR extends Controller
     
      public function store(Request $request)
      {
-         $logM = LogM::create([
-             'id_user' => Auth::user()->id,
-             'activity' => 'User Menambahkan Transaksi'
-         ]);
-     
-         $request->validate([
-             'nomor_unik' => 'required',
-             'nama_pelanggan' => 'required',
-             'selected_products' => 'required|array|min:1',
-             'selected_products.*.qty' => 'required|integer|min:1', // Validasi jumlah (qty) produk
-             'uang_bayar' => 'required',
-         ]);
-     
          // Inisialisasi variabel total harga
          $totalHarga = 0;
      
          foreach ($request->input('selected_products') as $productId => $productData) {
-            $product = ProductsM::find($productId);
-     
              $product = ProductsM::find($productId);
      
              if (!$product) {
                  return redirect()->route('transactions.create')->with('error', 'Produk Tidak Ditemukan');
              }
+     
+             $qty = $productData['qty'];
      
              if ($product->stok < $qty) {
                  return redirect()->route('transactions.create')->with('error', 'Stok ' . $product->nama_produk . ' Tidak Mencukupi');
@@ -83,13 +70,18 @@ class TransactionsR extends Controller
              // Hitung total harga dari produk saat ini
              $totalHargaProduk = $product->harga_produk * $qty;
      
+             // Menambahkan total harga dari produk saat ini ke totalHarga
+             $totalHarga += $totalHargaProduk;
+     
              $transaction = new TransactionsM;
              $transaction->nomor_unik = $request->input('nomor_unik');
              $transaction->nama_pelanggan = $request->input('nama_pelanggan');
              $transaction->id_produk = $productId;
              $transaction->qty = $qty;
              $transaction->total_harga = $totalHargaProduk;
-             $transaction->uang_bayar = $request->input('uang_bayar');
+             
+             // Masukkan nilai uang bayar ke dalam transaksi setelah validasi
+             $transaction->uang_bayar = 0; 
      
              // Uang kembali dihitung setelah transaksi selesai
              $transaction->uang_kembali = 0;
@@ -98,30 +90,52 @@ class TransactionsR extends Controller
      
              $product->save();
              $transaction->save();
-     
-             // Menambahkan total harga dari produk saat ini ke totalHarga transaksi
-             $totalHarga += $totalHargaProduk;
          }
      
+         // Validasi setelah loop selesai
+         $request->validate([
+             'nomor_unik' => 'required',
+             'nama_pelanggan' => 'required',
+             'selected_products' => 'required|array|min:1',
+             'uang_bayar' => 'required|numeric|min:' . $totalHarga, // Memastikan uang bayar cukup
+         ]);
+     
          $uangBayar = $request->input('uang_bayar');
+     
+         // Memeriksa apakah uang bayar mencukupi total harga
+         if ($uangBayar < $totalHarga) {
+             return redirect()->route('transactions.create')->with('error', 'Uang yang dibayarkan tidak mencukupi total harga transaksi.');
+         }
+     
+         // Setelah validasi selesai, masukkan nilai uang bayar ke dalam transaksi
+         foreach ($request->input('selected_products') as $productId => $productData) {
+             $transaction = TransactionsM::where('id_produk', $productId)->latest()->first();
+             $transaction->uang_bayar = $uangBayar;
+             $transaction->save();
+         }
+     
+         // Hitung uang kembali
          $uangKembali = $uangBayar - $totalHarga;
      
-         // Simpan nilai uang kembali dan total harga ke database
-         $lastTransaction = TransactionsM::latest()->first();
-         $lastTransaction->uang_kembali = $uangKembali;
-         $lastTransaction->total_harga = $totalHarga;
-         $lastTransaction->save();
+         // Simpan nilai uang kembali ke transaksi
+         foreach ($request->input('selected_products') as $productId => $productData) {
+             $transaction = TransactionsM::where('id_produk', $productId)->latest()->first();
+             $transaction->uang_kembali = $uangKembali;
+             $transaction->save();
+         }
      
          return redirect()->route('transactions.index')->with('success', 'Transaksi Berhasil Ditambahkan!');
      }
      
-     public function edit($id)
+
+     
+     public function edit($nomor_unik)
      {
+         $transaction = TransactionsM::where('nomor_unik', $nomor_unik)->first();
          $products = ProductsM::all();
-         $transaction = TransactionsM::find($id); // Menambahkan ini untuk mendapatkan data transaksi
          $subtitle = "Halaman Edit Transaksi"; 
-         return view('transactions_edit', compact('products', 'transaction', 'subtitle'));
-     }
+         return view('edit.transactionsedit', compact('transaction', 'products', 'subtitle'));
+     } 
      
      public function update(Request $request, $id)
 {
@@ -142,6 +156,12 @@ class TransactionsR extends Controller
 
     if (!$transaction) {
         return redirect()->route('transactions.index')->with('error', 'Data Transaksi tidak ditemukan.');
+    }
+
+    // Rollback stok sebelumnya
+    foreach ($transaction->products as $product) {
+        $product->stok += $product->pivot->qty;
+        $product->save();
     }
 
     // Delete old transactions with the same nomor_unik
@@ -196,8 +216,8 @@ class TransactionsR extends Controller
 
     // Redirect ke indeks transaksi dengan pesan sukses
     return redirect()->route('transactions.index')->with('success', 'Transaksi Berhasil Diupdate!');
-}
-     
+} 
+
     /**
      * Mengupdate transaksi yang telah diedit.
      *
