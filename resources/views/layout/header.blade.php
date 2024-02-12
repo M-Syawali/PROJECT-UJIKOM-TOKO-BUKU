@@ -99,6 +99,18 @@
             @if (Auth::user()->role== 'kasir')
             <li class="nav-small-cap">
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
+              <span class="hide-menu">Products</span>
+            </li>
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{{ url('products')}}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-book"></i>
+                </span>
+                <span class="hide-menu">Buku</span>
+              </a>
+            </li>
+            <li class="nav-small-cap">
+              <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">Transactions</span>
             </li>
             <li class="sidebar-item">
@@ -135,21 +147,20 @@
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">Transactions</span>
             </li>
-         
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{{ url('laporan')}}" aria-expanded="false">
+                <span>
+                  <i class="ti ti-file"></i>
+                </span>
+                <span class="hide-menu">Laporan</span>
+              </a>
+            </li>
               <li class="sidebar-item">
               <a class="sidebar-link" href="{{ url('datapembelian')}}" aria-expanded="false">
                 <span>
                   <i class="ti ti-database"></i>
                 </span>
                 <span class="hide-menu">Data Pembelian</span>
-              </a>
-            </li>
-              <li class="sidebar-item">
-              <a class="sidebar-link" href="{{ url('laporan')}}" aria-expanded="false">
-                <span>
-                  <i class="ti ti-file"></i>
-                </span>
-                <span class="hide-menu">Laporan</span>
               </a>
             </li>
             <li class="nav-small-cap">
@@ -213,12 +224,13 @@
       <!--  Header End -->
       <div class="container-fluid">
       @yield('content')
-        <div class="py-6 px-6 text-center">
-          <p class="mb-0 fs-4">Design and Developed by <a style="color: blue;">Muhamad W. Syawali</a></p>
-        </div>
+       
       </div>
     </div>
   </div>
+   <div class="py-6 px-6 text-center">
+          <p class="mb-0 fs-4">Design and Developed by <a style="color: blue;">Muhamad W. Syawali</a></p>
+        </div>
   <script src="{{ asset('assets/libs/jquery/dist/jquery.min.js') }}"></script>
   <script src="{{ asset('assets/libs/bootstrap/dist/js/bootstrap.bundle.min.js') }}"></script>
   <script src="{{ asset('assets/js/sidebarmenu.js') }}"></script>

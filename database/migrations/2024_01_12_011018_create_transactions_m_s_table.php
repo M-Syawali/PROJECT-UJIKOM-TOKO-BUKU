@@ -15,16 +15,13 @@
         {
             Schema::create('transactions', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedBigInteger('id_produk');
+                $table->json('products')->nullable();
                 $table->string('nama_pelanggan', 45);
                 $table->string('nomor_unik', 10);
-                $table->integer('qty');
                 $table->integer('total_harga');
                 $table->integer('uang_bayar');
                 $table->integer('uang_kembali');
                 $table->timestamps();
-
-                $table->foreign('id_produk')->references('id')->on('products');
             });
         }
 

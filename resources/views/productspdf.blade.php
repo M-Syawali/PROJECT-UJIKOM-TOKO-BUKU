@@ -16,6 +16,9 @@
 
     <!-- Custom Styles -->
     <style>
+         @page {
+            size: landscape;
+        }
         body {
             font-family: Arial, arial;
         }

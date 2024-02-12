@@ -10,20 +10,18 @@ class TransactionsM extends Model
     use HasFactory;
     protected $table = "transactions";
     protected $fillable = [
-        'id', 
-        'id_produk', 
+        'nomor_unik',
         'nama_pelanggan',
-        'nomor_unik',   
-        'qty',
+        'products',
         'total_harga',
-        'uang_bayar', 
-        'uang_kembali'
+        'uang_bayar',
+        'uang_kembali',
     ];
 
-       public function products()
-    {
-        return $this->belongsToMany(ProductsM::class, 'transactions', 'id', 'id_produk')
-            ->withPivot('qty'); // Assuming 'qty' is the name of the pivot column
-    }
+    protected $casts = [
+        'created_at' => 'datetime',
+        'products' => 'json',
+    ];
+    
     
 }

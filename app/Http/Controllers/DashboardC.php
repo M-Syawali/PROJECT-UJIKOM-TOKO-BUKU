@@ -23,7 +23,7 @@ class DashboardC extends Controller
     public function getTodayDate()
     {
         $todayDate = Carbon::now()->format('d/m/y');
-X
+
         return $todayDate;
     }
 

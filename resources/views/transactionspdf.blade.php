@@ -33,6 +33,10 @@
             border-top: 1px dashed #000;
             margin: 10px 0;
         }
+        /* Menambahkan margin antara setiap produk */
+        .product-item {
+            margin-bottom: 7;
+        }
     </style>
 </head>
 <body>
@@ -41,32 +45,38 @@
         <h3 style="font-size: 24px;">
             <i class="fas fa-paw"></i> Book Store
         </h3>
-        <p style="font-size: 14px;  text-align: left;">Tanggal : {{ $transactions[0]->created_at }} </p>
-        <p style="font-size: 14px;  text-align: left">Nomor Unik: {{ $transactions[0]->nomor_unik }}</p>
+       
+        <p style="font-size: 14px;  text-align: left">Nomor Unik: {{ $transactions->nomor_unik }}</p>
         <p style="font-size: 14px;  text-align: left;">Kasir : {{ Auth::user()->nama }} </p>
         <div class="divider"></div>
         <p style="font-size: 18px;">Bukti Transaksi Pembelian</p>
     </div>
-    <p style="font-size: 14px;">Nama Pelanggan: {{ $transactions[0]->nama_pelanggan }}</p>
-                    <p style="font-size: 14px;">Nama Produk:</p>
-                    <ol>
-                        <?php $totalHarga = 0; ?>
-                        @foreach ($transactions as $transaction)
-                            @foreach ($transaction->products as $product)
-                                <li style="font-size: 14px;">
-                                    {{ $product->nama_produk }},
-                                     {{ $transaction->qty }} - Rp.{{ number_format($transaction->qty * $product->harga_produk, 0, ',', '.') }}
-                                    <?php $totalHarga += $transaction->qty * $product->harga_produk; ?>
-                                </li>
-                            @endforeach
-                        @endforeach
-                    </ol>
-             
-     <!-- Total Harga for the Group -->
-     <p style="font-size: 14px;">Total Harga: Rp {{ number_format($totalHarga, 0, ',', '.') }}</p>
-     <p style="font-size: 14px;">Uang Bayar: Rp {{ number_format($transactions[0]->uang_bayar, 0, ',', '.') }}</p>
-     <p style="font-size: 14px;">Uang Kembali: Rp {{ number_format($transactions[0]->uang_kembali, 0, ',', '.') }}</p>
-                <!-- Add other transaction details as needed -->
+    <p style="font-size: 14px;">Nama Pelanggan: {{ $transactions->nama_pelanggan }}</p>
+    <p style="font-size: 14px;">Nama Produk:</p>
+    @if(isset($transactions->products) && is_array($transactions->products))
+        @php
+            $counter = 1; // variabel untuk nomor urut
+        @endphp
+        @foreach ($transactions->products as $product)
+            @php
+                $produkName = \App\Models\ProductsM::find($product['produkId']);
+            @endphp
+
+            @if(isset($produkName))
+                <p style="font-size: 14px;">{{ $counter }}. {{ $produkName['nama_produk'] }} - {{ $product['qty'] }} x <br> {{ isset($product['total']) ? 'Rp ' . number_format($product['total'], 0, ',', '.') : 'N/A' }}</p>
+                @php
+                    $counter++; // increment nomor urut
+                @endphp
+            @endif
+        @endforeach
+    @endif 
+    <div class="divider"></div>
+    <!-- Total Harga for the Group -->
+    <p style="font-size: 14px;">Total Harga: Rp {{ number_format($transactions->total_harga, 0, ',', '.') }}</p>
+    <div class="divider"></div>
+    <p style="font-size: 14px;">Uang Bayar: Rp {{ number_format($transactions->uang_bayar, 0, ',', '.') }}</p>
+    <p style="font-size: 14px;">Uang Kembali: Rp {{ number_format($transactions->uang_kembali, 0, ',', '.') }}</p>
+    <!-- Add other transaction details as needed -->
     <div class="footer">
         <div class="divider"></div>
         <p style="font-size: 15px;">Terima kasih atas kunjungan Anda</p>

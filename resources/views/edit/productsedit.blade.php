@@ -31,6 +31,8 @@
                             </option>
                             <option value="Cerita" {{ $products->jenis_buku == 'Cerita' ? 'selected' : '' }}>Cerita
                             </option>
+                            <option value="Pendidikan" {{ $products->jenis_buku == 'Pendidikan' ? 'selected' : '' }}>Pendidikan
+                            </option>
                         </select>
                     </div>
                     <div class="form-group">

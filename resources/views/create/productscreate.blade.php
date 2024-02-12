@@ -25,6 +25,7 @@
                             <option value="">- Pilih Jenis Buku -</option>
                             <option value="Novel">Novel</option>
                             <option value="Cerita">Cerita</option>
+                            <option value="Pendidikan">Pendidikan</option>
                         </select>
                     </div>
                     <div class="form-group">

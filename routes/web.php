@@ -50,9 +50,9 @@ Route::resource('products',ProductsR::class);
 Route::get('transactions', [TransactionsR::class, 'index'])->name('transactions.index');
 Route::get('transactions/create', [TransactionsR::class, 'create'])->name('transactions.create');
 Route::post('transactions/store', [TransactionsR::class, 'store'])->name('transactions.store');
-Route::get('transactions/edit/{nomor_unik}', [TransactionsR::class, 'edit'])->name('transactions.edit');
+Route::get('transactions/edit/{id}', [TransactionsR::class, 'edit'])->name('transactions.edit');
 Route::put('transactions/update/{id}', [TransactionsR::class, 'update'])->name('transactions.update');
-Route::delete('/transactions/{nomor_unik}', [TransactionsR::class, 'destroy'])->name('transactions.destroy');
+Route::delete('/transactions/{id}', [TransactionsR::class, 'destroy'])->name('transactions.destroy');
 
 Route::get('log',[LogC::class,'index'])->name('log.index');
 
@@ -62,5 +62,4 @@ Route::get('produk/pdf', [ProductsR::class, 'pdf'])->name('products.pdf');
 Route::get('laporan', [LaporanC::class, 'index'])->name('laporan.index');
 Route::get('/laporan/filter', [LaporanC::class, 'filter'])->name('laporan.filter');
 Route::get('/laporan/export', [LaporanC::class, 'export'])->name('laporan.export');
-
 

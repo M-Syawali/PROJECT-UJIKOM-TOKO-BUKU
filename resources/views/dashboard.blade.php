@@ -19,6 +19,19 @@
     <div class="d-flex justify-content-end m-8">
         <button type="submit" class="btn btn-light ml-auto"><i class="fa fa-calendar"></i> Today : {{ $todayDetails['dayName'] }}, {{ $todayDate }}</button>
     </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="rounded overflow-hidden">
+                <img class="img-profile" src="assets/images/dashboard1.jpeg" width="522px" height="300px">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="rounded overflow-hidden">
+                <img class="img-profile" src="assets/images/dashboard2.jpeg" width="522px" height="300px">
+            </div>
+        </div>
+    </div>
     <!-- Content Row -->
     <div class="row">
         <!-- Earnings (Monthly) Card Example -->

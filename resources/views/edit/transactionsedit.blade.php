@@ -2,226 +2,221 @@
 @section('content')
 <h3 class="h3 mb-0 text-gray-800"><strong>PAGES - EDIT TRANSACTIONS</strong></h3>
 <br>
-<div class="col-lg-12 grid-margin stretch-card">
-    <div class="card">
-        <div class="card-body">
-        <a href="{{ route('transactions.index') }}" class="btn btn-outline-dark m-1"><i
-                        class="ti ti-arrow-left"></i> </a>
+<div class="content">
+    <div class="animated fadeIn">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">        
+                    <div class="card-body">
+                        <a href="{{ route('transactions.index') }}" class="btn btn-outline-dark m-1"><i
+                            class="ti ti-arrow-left"></i> </a>
                         <br>
                         <br>
-            <form action="{{ route('transactions.update', $transaction->id) }}" method="POST" enctype="multipart/form-data" id="transactionForm">
-                @csrf
-                @method('PUT')
-                <div class="form-group">
-                    <label>Nomor Unik</label>
-                    <input name="nomor_unik" type="text" class="form-control" placeholder="..." value="{{ random_int(1000000000, 9999999999) }}" readonly>
-                    @error('nomor_unik')
-                    <p>{{ $message }}</p>
-                    @enderror
-                </div>
+                        <div class="card-body card-block">   
+                            <form action="{{ route('transactions.update', $transactions->id) }}" method="POST">
+                                @csrf
+                                @method('PUT')
+                              
+                                <!-- Input untuk nomor unik -->
+                                <div class="mb-3">
+                                    <label for="nomor_unik" class="form-label">Nomor Unik</label>
+                                    <input type="number" class="form-control" name="nomor_unik" value="{{ $transactions->nomor_unik }}" readonly>
+                                    @error('nomor_unik')
+                                    <p>{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                
+                                <!-- Input untuk nama pelanggan -->
+                                <div class="mb-3">
+                                    <label for="nama_pelanggan" class="form-label">Nama Pelanggan</label>
+                                    <input type="text" class="form-control" name="nama_pelanggan" value="{{ $transactions->nama_pelanggan }}">
+                                    @error('nama_pelanggan')
+                                    <p>{{ $message }}</p>
+                                    @enderror
+                                </div>
 
-                <div class="form-group">
-                    <label>Nama Pelanggan</label>
-                    <input name="nama_pelanggan" type="text" class="form-control" placeholder="..."value="{{ $transaction->nama_pelanggan }}">
-                    @error('nama_pelanggan')
-                    <p>{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <div class="form-group">
-                    <label>Pilih Produk</label>
-                    <div class="input-group">
-                        <select class="form-control" id="id_produk">
-                            <option value="">Pilih Produk</option>
-                            @foreach ($products as $data)
-                                <option value="{{ $data->id }}" data-nama="{{ $data->nama_produk }}" data-harga="{{ $data->harga_produk }}" data-stok="{{ $data->stok }}">
-                                    {{ $data->nama_produk }} - {{ $data->harga_produk }}
-                                </option>
-                            @endforeach
-                        </select>
-                        <div class="input-group-append">
-                            <button type="button" class="btn btn-outline-primary m-1" onclick="addSelectedProduct()"><i class="ti ti-plus"></i></button>
+                                <!-- Pilihan produk -->
+                                <label for="products" class="form-label">Nama Produk</label>
+                                <div class="mb-3 d-flex">
+                                   
+                                    <select name="products[]" required id="products" class="form-control">
+                                        <option selected>Pilih Produk</option>
+                                        @foreach ($products as $p)
+                                            @php
+                                                $isSelected = false;
+                                                foreach ($transactions->products as $transactionProduct) {
+                                                    if ($transactionProduct['produkId'] == $p->id) {
+                                                        $isSelected = true;
+                                                        break;
+                                                    }
+                                                }
+                                            @endphp
+                                            <option value="{{ $p->id }}" data-harga="{{ $p->harga_produk }}" {{ $isSelected ? 'selected' : '' }}>
+                                                {{ $p->nama_produk }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <input type="hidden" id="selectedProdukId" name="selectedProdukId" value="">
+                                    <button type="button" class="btn btn-outline-primary m-1" onclick="addRow()"><i
+                                            class="ti ti-plus"></i></button>
+                                </div>
+                                
+                                <!-- Tabel produk yang dipilih -->
+                                <div class="table-responsive my-3">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">No</th>
+                                                <th scope="col">Produk</th>
+                                                <th scope="col">Harga</th>
+                                                <th scope="col">Qty</th>
+                                                <th scope="col">Total</th>
+                                                <th scope="col">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tableBody">
+                                            @foreach ($transactions->products as $existingProduk)
+                                                @php
+                                                    $products = \App\Models\ProductsM::find($existingProduk['produkId']);
+                                                @endphp
+                                                <tr>
+                                                    <td>{{ $loop->iteration }}</td>
+                                                    <td>{{ $products->nama_produk }}</td>
+                                                    <td>Rp. <span class="harga" data-harga="{{ $products->harga_produk }}">{{ $products->harga_produk }}</span></td>
+                                                    <td>
+                                                        <input type="number" class="form-control qtyInput" name="qty[]" value="{{ $existingProduk['qty'] }}" min="1">
+                                                        <input type="hidden" name="produkId[]" value="{{ $existingProduk['produkId'] }}">
+                                                    </td>
+                                                    <td class="totalRow">Rp. {{ $existingProduk['total'] }}</td>
+                                                    <td><button type="button" class="btn btn-outline-danger m-1" onclick="removeRow(this)"><i class="ti ti-trash"></i></button></td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <!-- Input untuk total harga -->
+                                <div class="mb-3">
+                                    <label for="total_harga" class="form-label">Total Bayar</label>
+                                    <input type="number" class="form-control" id="total_harga" name="total_harga" readonly value="{{ $transactions->total_harga}}">
+                                </div>
+                                
+                                <!-- Input untuk uang bayar -->
+                                <div class="mb-3">
+                                    <label for="uang_bayar" class="form-label">Uang Bayar</label>
+                                    <input type="number" class="form-control" name="uang_bayar"  aria-describedby="emailHelp" oninput="hitungUangKembali()">
+                                    @error('uang_bayar')
+                                    <p>{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                
+                                <!-- Tombol submit -->
+                                <button type="submit" class="btn btn-outline-primary m-1">Edit</button>
+                            </form>
                         </div>
                     </div>
                 </div>
-                <br>
-               <!-- Tambahkan elemen untuk menampilkan tabel produk yang dipilih -->
-                <div id="selectedProductsTableContainer">
-                    <table id="selectedProductsTable" class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Nama Produk</th>
-                                <th>Harga Produk</th>
-                                <th>Qty</th>
-                                <th>Total</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Daftar produk yang dipilih akan ditampilkan di sini -->
-                        </tbody>
-                    </table>
-                </div>
+            </div>
+        </div>
+    </div><!-- .animated -->
+</div><!-- .content -->
 
-                <!-- Tambahkan tabel total harga -->
-                <div id="totalContainer" class="mt-3">
-                    <table class="table table-bordered">
-                        <tr>
-                            <th>Total Keseluruhan Harga:</th>
-                            <td id="totalHarga">Rp.0</td>
-                        </tr>
-                    </table>
-                </div>
+<footer class="footer">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-6">
+                <!-- Your footer content goes here -->
+            </div>
+        </div>
+    </div>
+</footer>
 
-                <script>
-                    var selectedProducts = {};
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<script>
+    $(document).ready(function () {
+        $('#myTable').DataTable();
 
-                    function addProductToTable(productId, productName, productPrice, productStock) {
-                        if (productStock <= 0) {
-                            Swal.fire({
-                                title: 'Stok Habis',
-                                text: 'Stok produk ' + productName + ' habis',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                            return;
-                        }
+        // Calculate and display the total sum
+        var totalHarga = 0;
+        var totalTransaksi = 0;
 
-                        if (selectedProducts[productId]) {
-                            selectedProducts[productId].qty += 1;
-                        } else {
-                            selectedProducts[productId] = {
-                                name: productName,
-                                price: productPrice,
-                                qty: 1
-                            };
-                        }
+        $('tbody tr').each(function () {
+            var harga = parseFloat($(this).find('td:eq(6)').text().replace('Rp. ', '').replace(',', '')) || 0; // Assuming 'total_harga' is in the 7th column
+            var transaksi = 1; // Assuming each row is a transaction
 
-                        displaySelectedProducts();
-                    }
+            totalHarga += harga;
+            totalTransaksi += transaksi;
+        });
 
-                    function addSelectedProduct() {
-                    var selectedProductId = $('#id_produk').val();
-                    var selectedProductName = $('#id_produk option:selected').data('nama');
-                    var selectedProductPrice = $('#id_produk option:selected').data('harga');
-                    var selectedProductStock = $('#id_produk option:selected').data('stok');
-
-                        if (selectedProductId && selectedProductName && selectedProductPrice) {
-                            addProductToTable(selectedProductId, selectedProductName, selectedProductPrice, selectedProductStock);
-                        } else {
-                            Swal.fire({
-                                title: 'Pilih Produk',
-                                text: 'Pilih setidaknya satu produk',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    }
-
-
-                function removeProductFromTable(button) {
-                    var productId = $(button).data('product-id');
-
-                    if (selectedProducts[productId]) {
-                        delete selectedProducts[productId];
-                        $(button).closest('tr').remove(); // Hapus baris dari tabel saat menghapus produk
-                    }
-
-                        displaySelectedProducts();
-                    }
-
-                    function formatRupiah(angka) {
-                        var reverse = angka.toString().split('').reverse().join(''),
-                            ribuan = reverse.match(/\d{1,3}/g);
-                        ribuan = ribuan.join('.').split('').reverse().join('');
-                        return ribuan;
-                    }
-
-                    function displayTotalHarga() {
-                        var totalHarga = 0;
-
-                        for (var productId in selectedProducts) {
-                            if (selectedProducts.hasOwnProperty(productId)) {
-                                var product = selectedProducts[productId];
-                                var totalPerProduk = product.qty * parseFloat(product.price);
-                                totalHarga += totalPerProduk;
-                            }
-                        }
-
-                        $('#totalHarga').text('Rp.' + formatRupiah(totalHarga.toFixed(2)));
-                    }
-
-                    function displaySelectedProducts() {
-                        $('#selectedProductsTable tbody').empty();
-
-                        for (var productId in selectedProducts) {
-                            if (selectedProducts.hasOwnProperty(productId)) {
-                                var product = selectedProducts[productId];
-                                var totalPerProduk = product.qty * parseFloat(product.price);
-
-                                $('#selectedProductsTable tbody').append(
-                                    '<tr>' +
-                                    '<td>' + product.name + '</td>' +
-                                    '<td>' + product.price + '</td>' +
-                                    '<td><input type="number" class="form-control" value="' + product.qty + '" onchange="updateQty(this, ' + productId + ')" /></td>' +
-                                    '<td>' + formatRupiah(totalPerProduk) + '</td>' +
-                                    '<td><button type="button" class="btn btn-outline-danger" data-product-id="' + productId + '" onclick="removeProductFromTable(this)"><i class="ti ti-trash"></i></button></td>' +
-                                    '</tr>'
-                                );
-                            }
-                        }
-
-                        displayTotalHarga();
-                    }
-
-                    function updateQty(input, productId) {
-                        var qty = parseInt($(input).val());
-                        if (!isNaN(qty) && qty > 0) {
-                            selectedProducts[productId].qty = qty;
-                            displaySelectedProducts();
-                        } else {
-                            // Jika input tidak valid, tampilkan pesan kesalahan dan kembalikan ke nilai sebelumnya
-                            $(input).val(selectedProducts[productId].qty);
-                            Swal.fire({
-                                title: 'Input tidak valid',
-                                text: 'Harap masukkan nilai kuantitas yang valid.',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        }
-                    }
-
-                    function validateAndSubmit() {
-                        if ($('#selectedProductsTable tbody tr').length === 0) {
-                            Swal.fire({
-                                title: 'Pilih Produk',
-                                text: 'Pilih setidaknya satu produk',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        } else if (!$('input[name="uang_bayar"]').val()) {
-                            Swal.fire({
-                                title: 'Uang Bayar',
-                                text: 'Masukkan jumlah uang bayar',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
-                        } else {
-                            for (var productId in selectedProducts) {
-                                if (selectedProducts.hasOwnProperty(productId)) {
-                                    var product = selectedProducts[productId];
-                                    $('#transactionForm').append('<input type="hidden" name="selected_products[' + productId + '][name]" value="' + product.name + '">');
-                                    $('#transactionForm').append('<input type="hidden" name="selected_products[' + productId + '][price]" value="' + product.price + '">');
-                                    $('#transactionForm').append('<input type="hidden" name="selected_products[' + productId + '][qty]" value="' + product.qty + '">');
-                                }
-                            }
-
-                            displaySelectedProducts();
-
-                            document.getElementById('transactionForm').submit();
-                            showSuccessPopup();
-                     }
-                }
+        $('#total-harga').text('Rp. ' + totalHarga.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
+        $('#total-transaksi').text(totalTransaksi);
+    });
 </script>
 
+
+<script>
+    
+    function addRow() {
+        var selectedProduk = $('#products option:selected');
+        var produkName = selectedProduk.text();
+        var produkId = selectedProduk.val();
+        var produkHarga = selectedProduk.data('harga');
+        var qty = $('#qty').val();
+        var existingProduk = $('#tableBody tr').find('input[value="' + produkId + '"]').length > 0;
+
+        if (!existingProduk) {
+            var total = produkHarga * qty;
+
+            var newRow = `
+            <tr>
+                <td>${$('#tableBody tr').length + 1}</td>
+                <td>${produkName}</td>
+                <td>Rp. <span class="harga" data-harga="${produkHarga}">${produkHarga}</span></td>
+                <td>
+                    <input type="number" class="form-control qtyInput" name="qty[]" value="${qty}" min="1">
+                    <input type="hidden" name="produkId[]" value="${produkId}">
+                </td>
+                <td class="totalRow">Rp. ${total}</td>
+                <td><button type="button" class="btn btn-outline-danger m-1" onclick="removeRow(this)"><i class="ti ti-trash"></i></button></td>
+            </tr>
+            `;
+
+            $('#tableBody').append(newRow);
+            updateTotalHarga();
+        } else {
+            alert('Produk sudah ditambahkan sebelumnya. Untuk mengedit, gunakan fitur edit.');
+        }
+
+        // Clear input fields after adding a row
+        $('#qty').val('');
+        $('#selectedProdukId').val('');
+    }
+
+    function removeRow(row) {
+        $(row).parent().parent().remove();
+        updateTotalHarga();
+    }
+
+    function updateTotalHarga() {
+        var totalHarga = 0;
+
+        $('#tableBody tr').each(function () {
+            var qty = parseFloat($(this).find('.qtyInput').val());
+            var harga = parseFloat($(this).find('.harga').data('harga'));
+            var totalRow = qty * harga;
+
+            $(this).find('.totalRow').text('Rp. ' + totalRow);
+            totalHarga += totalRow;
+        });
+
+        $('#total_harga').val(totalHarga);
+    }
+
+    $(document).on('input', '.qtyInput', function () {
+        updateTotalHarga();
+    });
+
+</script>
 @endsection

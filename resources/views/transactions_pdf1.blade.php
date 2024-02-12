@@ -81,40 +81,48 @@
             </tr>
         </thead>
         <tbody>
-            <?php $nomor_unik = 1; $grandTotal = 0; ?>
-            @forelse($groupedTransactions as $transactions)
+            @php
+                $totalTransactions = 0;
+            @endphp
+            @foreach ($transactions as $p)
                 <tr>
                     <td>{{ $loop->iteration }}</td>
-                    <td>{{ $transactions[0]->nomor_unik }}</td>
-                    <td>{{ $transactions[0]->nama_pelanggan }}</td>
+                    <td>{{ $p->nomor_unik }}</td>
+                    <td>{{ $p->nama_pelanggan }}</td>
                     <td>
-                        <ol>
-                            <?php $totalHarga = 0; ?>
-                            @foreach ($transactions as $transaction)
-                                <li>
-                                    @foreach ($transaction->products as $product)
-                                        {{ $product->nama_produk }} - {{ $transaction->qty }} - Rp.{{ number_format($transaction->qty * $product->harga_produk, 0, ',', '.') }}
-                                        <?php $totalHarga += $transaction->qty * $product->harga_produk; ?>
-                                    @endforeach
-                                </li>
-                            @endforeach
-                        </ol>
-                    </td>                                                                                     
-                    <td>Rp.{{ number_format($totalHarga, 0, ',', '.') }}</td> 
-                    <td>Rp.{{ number_format($transactions[0]->uang_bayar, 0, ',', '.') }}</td>
-                    <td>Rp.{{ number_format($transactions[0]->uang_kembali, 0, ',', '.') }}</td>
-                    <td>{{ $transactions[0]->created_at }}</td>
+                        <ul>
+                            @if(isset($p->products) && is_array($p->products))
+                                @php $counter = 1; @endphp
+                                @foreach ($p->products as $products)
+                                    @php
+                                        $produkName = \App\Models\ProductsM::find($products['produkId']);
+                                    @endphp
+
+                                    @if(isset($produkName))
+                                        <li>{{ $counter }}. {{ $produkName['nama_produk'] }} - {{ $products['qty'] }} x <br> Rp. {{ isset($products['total']) ? $products['total'] : 'N/A' }}</li>
+                                        @php
+                                            $counter++;
+                                        @endphp
+                                    @endif
+                                @endforeach
+                            @endif
+                        </ul>
+                    </td>
+                    <td>Rp. {{ number_format($p->total_harga, 0, ',', '.') }}</td>
+                    <td>Rp. {{ number_format($p->uang_bayar, 0, ',', '.') }}</td>
+                    <td>Rp. {{ number_format($p->uang_kembali, 0, ',', '.') }}</td>
+                    <td>{{ \Carbon\Carbon::parse($p->created_at)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</td>
                 </tr>
-                <?php $grandTotal += $totalHarga; ?>
-            @empty
-                <tr>
-                    <td colspan="9">Tidak Ada Data Transaksi</td>
-                </tr>
-            @endforelse
+                @php
+                    $totalTransactions += $p->total_harga;
+                @endphp
+            @endforeach
         </tbody>
     </table>
+  
+    <!-- Total Keseluruhan Transaksi -->
     <div class="total-section">
-        <p>Total Transaksi: Rp.{{ number_format($grandTotal, 0, ',', '.') }}</p>
+        Total Keseluruhan Transaksi: Rp. {{ number_format($totalTransactions, 0, ',', '.') }}
     </div>
 
     <!-- Additional Information -->
