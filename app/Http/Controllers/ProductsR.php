@@ -43,7 +43,7 @@ class ProductsR extends Controller
             'activity' => 'User Di Halaman Tambah Produk'
         ]);
 
-        $subtitle = "Products Tambah Pages";
+        $subtitle = "Pages Products Tambah";
         $products = ProductsM::all();
         return view('create.productscreate', compact('products','subtitle',));
     }
@@ -116,7 +116,7 @@ class ProductsR extends Controller
             'activity' => 'User Di Halaman Edit Produk'
         ]);
 
-        $subtitle = "Products Edit Pages";
+        $subtitle = "Pages Products Edit";
         $products = ProductsM::find($id);
         return view('edit.productsedit',compact('products','subtitle'));
     }

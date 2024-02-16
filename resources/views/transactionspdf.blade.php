@@ -45,8 +45,8 @@
         <h3 style="font-size: 24px;">
             <i class="fas fa-paw"></i> Book Store
         </h3>
-       
-        <p style="font-size: 14px;  text-align: left">Nomor Unik: {{ $transactions->nomor_unik }}</p>
+        <p style="font-size: 14px;  text-align: left">Tanggal : {{ $transactions->created_at }}</p>
+        <p style="font-size: 14px;  text-align: left">Nomor Unik : {{ $transactions->nomor_unik }}</p>
         <p style="font-size: 14px;  text-align: left;">Kasir : {{ Auth::user()->nama }} </p>
         <div class="divider"></div>
         <p style="font-size: 18px;">Bukti Transaksi Pembelian</p>

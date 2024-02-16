@@ -35,24 +35,36 @@
                                     @enderror
                                 </div>
 
+                                <div class="mb-3">
+                                    <label for="searchInput" class="form-label">Cari Jenis Buku - Nama Buku</label>
+                                    <div class="input-group">
+                                        <input type="text" id="searchInput" class="form-control" placeholder="Masukan Jenis Buku - Nama Buku">
+                                    </div>
+                                </div>
+
                                 <!-- Pilihan produk -->
-                                <label for="products" class="form-label">Nama Produk</label>
+                                <label for="products" class="form-label">Buku</label>
                                 <div class="mb-3 d-flex">
                                    
                                     <select name="products[]" required id="products" class="form-control">
                                         <option selected>Pilih Produk</option>
                                         @foreach ($products as $p)
                                             @php
+                                                // Mengatur nilai default untuk flag isSelected
                                                 $isSelected = false;
+                                                
+                                                // Melakukan loop pada setiap produk dalam transaksi
                                                 foreach ($transactions->products as $transactionProduct) {
+                                                    // Memeriksa apakah produk saat ini dalam iterasi cocok dengan produk dalam transaksi
                                                     if ($transactionProduct['produkId'] == $p->id) {
+                                                        // Jika ada kecocokan, set isSelected menjadi true dan keluar dari loop
                                                         $isSelected = true;
                                                         break;
                                                     }
                                                 }
                                             @endphp
                                             <option value="{{ $p->id }}" data-harga="{{ $p->harga_produk }}" {{ $isSelected ? 'selected' : '' }}>
-                                                {{ $p->nama_produk }}
+                                                {{ $p->jenis_buku }} - {{ $p->nama_produk }}
                                             </option>
                                         @endforeach
                                     </select>
@@ -94,7 +106,6 @@
                                         </tbody>
                                     </table>
                                 </div>
-                                
                                 <!-- Input untuk total harga -->
                                 <div class="mb-3">
                                     <label for="total_harga" class="form-label">Total Bayar</label>
@@ -135,27 +146,29 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
-    $(document).ready(function () {
-        $('#myTable').DataTable();
+            $(document).ready(function () {
+            // Get the select element and options
+            var select = $('#products');
+            var options = select.find('option');
 
-        // Calculate and display the total sum
-        var totalHarga = 0;
-        var totalTransaksi = 0;
+            // Get the search input element
+            var searchInput = $('#searchInput');
 
-        $('tbody tr').each(function () {
-            var harga = parseFloat($(this).find('td:eq(6)').text().replace('Rp. ', '').replace(',', '')) || 0; // Assuming 'total_harga' is in the 7th column
-            var transaksi = 1; // Assuming each row is a transaction
+            // Add input event listener to the search input
+            searchInput.on('input', function () {
+                var searchQuery = $(this).val().toLowerCase();
 
-            totalHarga += harga;
-            totalTransaksi += transaksi;
+                // Filter options based on the search query
+                var filteredOptions = options.filter(function () {
+                    var optionText = $(this).text().toLowerCase();
+                    return optionText.indexOf(searchQuery) > -1;
+                });
+
+                // Update the select element with filtered options
+                select.html(filteredOptions);
+            });
         });
-
-        $('#total-harga').text('Rp. ' + totalHarga.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
-        $('#total-transaksi').text(totalTransaksi);
-    });
-</script>
-
-
+    </script>
 <script>
     
     function addRow() {
@@ -163,11 +176,20 @@
         var produkName = selectedProduk.text();
         var produkId = selectedProduk.val();
         var produkHarga = selectedProduk.data('harga');
-        var qty = $('#qty').val();
-        var existingProduk = $('#tableBody tr').find('input[value="' + produkId + '"]').length > 0;
-
-        if (!existingProduk) {
-            var total = produkHarga * qty;
+        var qty = selectedProduk.closest('.d-flex').find('.qtyInput').val();
+        
+        // Check if the product already exists in the table
+        var existingProduk = $('#tableBody').find('input[name="produkId[]"][value="' + produkId + '"]').length > 0;
+        if (existingProduk) {
+            Swal.fire(
+                'Produk sudah ditambahkan sebelumnya',
+                'Anda tidak dapat menambahkan produk yang sama lagi.',
+                'warning'
+            );
+            return; // Stop further execution
+        }
+        
+        var total = produkHarga * qty;
 
             var newRow = `
             <tr>
@@ -185,18 +207,22 @@
 
             $('#tableBody').append(newRow);
             updateTotalHarga();
-        } else {
-            alert('Produk sudah ditambahkan sebelumnya. Untuk mengedit, gunakan fitur edit.');
-        }
 
         // Clear input fields after adding a row
         $('#qty').val('');
         $('#selectedProdukId').val('');
     }
 
-    function removeRow(row) {
-        $(row).parent().parent().remove();
-        updateTotalHarga();
+        function removeRow(row) {
+        $(row).closest('tr').remove();
+        updateRowNumbers(); // Panggil fungsi untuk memperbarui nomor urut setelah menghapus baris
+        updateTotalHarga(); // Panggil fungsi untuk memperbarui total harga setelah menghapus baris
+    }
+
+    function updateRowNumbers() {
+        $('#tableBody tr').each(function(index) {
+            $(this).find('td:first').text(index + 1); // Perbarui nomor urut
+        });
     }
 
     function updateTotalHarga() {

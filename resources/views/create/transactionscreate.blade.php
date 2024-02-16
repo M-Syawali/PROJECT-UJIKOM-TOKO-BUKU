@@ -27,15 +27,24 @@
                                     <p>{{ $message }}</p>
                                     @enderror
                                 </div>
-                                <label for="products" class="form-label">Nama Produk</label>
-                                <div class="mb-3 d-flex align-items-center">
-                                    <select name="products[]" required id="products" class="form-control select2 me-2">
-                                        <option selected>-Pilih Produk-</option>
-                                        @foreach ($products as $p)
-                                        <option value="{{ $p->id }}" data-harga="{{ $p->harga_produk }}">{{ $p->nama_produk }}</option>
-                                        @endforeach
-                                    </select>
-                                    <button type="button" class="btn btn-outline-primary" onclick="addRow()"><i class="ti ti-plus"></i></button>
+                                <div class="mb-3">
+                                    <label for="searchInput" class="form-label">Cari Jenis Buku - Nama Buku</label>
+                                    <div class="input-group">
+                                        <input type="text" id="searchInput" class="form-control" placeholder="Masukan Jenis Buku - Nama Buku">
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="products" class="form-label">Buku</label>
+                                    <div class="d-flex align-items-center">
+                                        <select name="products[]" required id="products" class="form-control select2">
+                                            <option selected>-Pilih Produk-</option>
+                                            @foreach ($products as $p)
+                                            <option value="{{ $p->id }}" data-harga="{{ $p->harga_produk }}" data-jenis="{{ $p->jenis_buku }}">{{ $p->jenis_buku }} - {{ $p->nama_produk }} </option>
+                                            @endforeach
+                                        </select>
+                                        <button type="button" class="btn btn-outline-primary ms-2" onclick="addRow()"><i class="ti ti-plus"></i></button>
+                                    </div>
                                 </div>
                                 <div class="table-responsive my-3">
                                     <table class="table">
@@ -85,7 +94,7 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script>
-        $(document).ready(function () {
+            $(document).ready(function () {
             // Get the select element and options
             var select = $('#products');
             var options = select.find('option');
@@ -109,20 +118,23 @@
         });
     </script>
     <script>
-        $(document).ready(function () {
-            $('.select2').select2({
-                placeholder: 'Pilih Produk',
-                allowClear: true
-            });
-        });
-    </script>
-    <script>
-        function addRow() {
-            var selectedProduk = $('#products option:selected');
-            var produkName = selectedProduk.text();
-            var produkId = selectedProduk.val();
-            var produkHarga = selectedProduk.data('harga');
-            var qty = selectedProduk.closest('.d-flex').find('.qtyInput').val();
+ function addRow() {
+        var selectedProduk = $('#products option:selected');
+        var produkName = selectedProduk.text();
+        var produkId = selectedProduk.val();
+        var produkHarga = selectedProduk.data('harga');
+        var qty = selectedProduk.closest('.d-flex').find('.qtyInput').val();
+        
+        // Check if the product already exists in the table
+        var existingProduk = $('#tableBody').find('input[name="produkId[]"][value="' + produkId + '"]').length > 0;
+        if (existingProduk) {
+            Swal.fire(
+                'Produk sudah ditambahkan sebelumnya',
+                'Anda tidak dapat menambahkan produk yang sama lagi.',
+                'warning'
+            );
+            return; // Stop further execution
+        }
 
             var total = produkHarga * qty;
 
@@ -143,9 +155,16 @@
             updateTotalHarga();
         }
 
-        function removeRow(row) {
+       function removeRow(row) {
             $(row).closest('tr').remove();
-            updateTotalHarga();
+            updateRowNumbers(); // Update row numbers after removing a row
+            updateTotalHarga(); // Update total harga after removing a row
+        }
+
+        function updateRowNumbers() {
+            $('#tableBody tr').each(function(index) {
+                $(this).find('td:first').text(index + 1); // Update nomor urut
+            });
         }
 
         function updateTotalHarga() {

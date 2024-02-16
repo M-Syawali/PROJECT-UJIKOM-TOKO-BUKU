@@ -34,12 +34,13 @@
             width: 100%;
             border: 1px solid #000000;
             border-collapse: collapse;
-            font-size: 14px; /* Adjust the font size as needed */
+            font-size: 13px; /* Adjust the font size as needed */
         }
 
         th, td {
             border: 1px solid #000000;
             padding: 5px;
+            text-align: left;
         }
 
         th {
@@ -67,6 +68,7 @@
 </head>
 <body>
     <h3>DAFTAR TRANSAKSI</h3>
+    <div class="table-responsivie">
     <table id="myTable" class="table table-bordered table-striped">
         <thead>
             <tr>
@@ -74,6 +76,7 @@
                 <th>Nomor Unik</th>
                 <th>Nama Pelanggan</th>
                 <th>Produk</th>
+                <th>Harga Satuan</th>
                 <th>Total Harga</th> 
                 <th>Uang Bayar</th>
                 <th>Uang Kembali</th>
@@ -99,7 +102,7 @@
                                     @endphp
 
                                     @if(isset($produkName))
-                                        <li>{{ $counter }}. {{ $produkName['nama_produk'] }} - {{ $products['qty'] }} x <br> Rp. {{ isset($products['total']) ? $products['total'] : 'N/A' }}</li>
+                                        <li>{{ $counter }}. {{ $produkName['nama_produk'] }} - {{ $products['qty'] }} x</li>
                                         @php
                                             $counter++;
                                         @endphp
@@ -108,10 +111,24 @@
                             @endif
                         </ul>
                     </td>
+                    <td>
+                     @if(isset($p->products) && is_array($p->products))
+                        <ul>
+                            @foreach ($p->products as $products)
+                                @php
+                                    $produkName = \App\Models\ProductsM::find($products['produkId']);
+                                 @endphp
+                                 @if(isset($produkName))
+                                    <li>Rp. {{ number_format($produkName['harga_produk'], 0, ',', '.') }}</li>
+                                 @endif
+                            @endforeach
+                        </ul>
+                     @endif 
+                    </td>
                     <td>Rp. {{ number_format($p->total_harga, 0, ',', '.') }}</td>
                     <td>Rp. {{ number_format($p->uang_bayar, 0, ',', '.') }}</td>
                     <td>Rp. {{ number_format($p->uang_kembali, 0, ',', '.') }}</td>
-                    <td>{{ \Carbon\Carbon::parse($p->created_at)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</td>
+                    <td>{{ $p->created_at }}</td>
                 </tr>
                 @php
                     $totalTransactions += $p->total_harga;
@@ -119,6 +136,7 @@
             @endforeach
         </tbody>
     </table>
+    </div>
   
     <!-- Total Keseluruhan Transaksi -->
     <div class="total-section">

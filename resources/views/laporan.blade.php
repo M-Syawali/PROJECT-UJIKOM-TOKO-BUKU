@@ -1,5 +1,6 @@
 @extends('layout.header')
 @section('content')
+<h1 class="h3 mb-4 text-gray-800"><strong>PAGES - LAPORAN</strong></h1>
 <style>
     /* Font tabel */
     .table td {
@@ -21,11 +22,6 @@
         margin-right: 10px;
     }
 
-    /* Titik hitam pada list produk */
-    .list-item {
-        list-style-type: disc;
-        margin-left: 20px;
-    }
 </style>
 <div class="col-lg-12 grid-margin stretch-card">
     <div class="card">
@@ -68,6 +64,8 @@
                             <th>NOMOR UNIK</th>
                             <th>NAMA PELANGGAN</th>
                             <th>PRODUK</th>
+                            <th>QTY</th>
+                            <th>HARGA SATUAN</th>
                             <th>TOTAL HARGA</th>
                             <th>UANG BAYAR</th>
                             <th>UANG KEMBALI</th>
@@ -79,28 +77,50 @@
                             <tr>
                                 <td>{{ $loop->iteration }}</td>
                                 <td>{{ $p->nomor_unik }}</td>
-                                <td class="text-center">{{ $p->nama_pelanggan }}</td>
+                                <td>{{ $p->nama_pelanggan }}</td>
                                 <td>
-                                    <ul class="list-item">
-                                        @if(isset($p->products) && is_array($p->products))
+                                    @if(isset($p->products) && is_array($p->products))
+                                        <ul  class="list-item">
                                             @php $counter = 1; @endphp
                                             @foreach ($p->products as $products)
                                                 @php
-                                                    $productName = \App\Models\ProductsM::find($products['produkId']);
+                                                    $produkName = \App\Models\ProductsM::find($products['produkId']);
                                                 @endphp
-
-                                                @if(isset($productName))
-                                                    <li>{{ $counter }}. {{ $productName->nama_produk }} - {{ $products['qty'] }} x <br> Rp. {{ number_format($products['total'], 0, ',', '.') }}</li>
+                                                @if(isset($produkName))
+                                                    <li>{{ $counter }}. {{ $produkName['nama_produk'] }}</li>
                                                     @php $counter++; @endphp
                                                 @endif
                                             @endforeach
-                                        @endif 
-                                    </ul>
+                                        </ul>
+                                    @endif 
+                                </td>
+                                <td>
+                                    @if(isset($p->products) && is_array($p->products))
+                                        <ul>
+                                            @foreach ($p->products as $products)
+                                                <li>{{ $products['qty'] }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @endif 
+                                </td>
+                                <td>
+                                    @if(isset($p->products) && is_array($p->products))
+                                        <ul>
+                                            @foreach ($p->products as $products)
+                                                @php
+                                                    $produkName = \App\Models\ProductsM::find($products['produkId']);
+                                                @endphp
+                                                @if(isset($produkName))
+                                                    <li>Rp. {{ number_format($produkName['harga_produk'], 0, ',', '.') }}</li>
+                                                @endif
+                                            @endforeach
+                                        </ul>
+                                    @endif 
                                 </td>
                                 <td class="text-center">Rp. {{ number_format($p->total_harga, 0, ',', '.') }}</td>
                                 <td class="text-center">Rp. {{ number_format($p->uang_bayar, 0, ',', '.') }}</td>
                                 <td class="text-center">Rp. {{ number_format($p->uang_kembali, 0, ',', '.') }}</td>
-                                <td class="text-center">{{ \Carbon\Carbon::parse($p->created_at)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</td>
+                                <td>{{ $p->created_at }}</td>
                             </tr>
                         @endforeach
                     </tbody>

@@ -34,7 +34,6 @@ class LaporanC extends Controller
 
     }
 
-
     public function export(Request $request)
     {
         $startDate = $request->input('startDate') ?? now()->subMonth()->format('Y-m-d');

@@ -67,14 +67,7 @@
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">Transactions</span>
             </li>
-            <li class="sidebar-item">
-              <a class="sidebar-link" href="{{ url('transactions')}}" aria-expanded="false">
-                <span>
-                <i class="menu-icon ti ti-shopping-cart"></i>
-                </span>
-                <span class="hide-menu">Transactions</span>
-              </a>
-            </li>
+          
             <li class="sidebar-item">
               <a class="sidebar-link" href="{{ url('datapembelian')}}" aria-expanded="false">
                 <span>
@@ -199,12 +192,12 @@
           <div class="navbar-collapse justify-content-end" id="navbarNav">
         <ul class="navbar-nav align-items-center">
             <li class="nav-item">
-            <h6>Hi, {{ Auth::user()->nama }} - {{ Auth::user()->role }}</h6>
+            <h6>Hi, {{ Auth::user()->nama }} - {{ Auth::user()->role }} </h6>
             </li>
             <li class="nav-item dropdown">
             <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
                 aria-expanded="false">
-                <img src="{{ asset('assets/images/profile/user-1.jpg') }}" alt="" width="35" height="35" class="rounded-circle">
+                <i class="ti ti-chevron-down" alt="" width="35" height="35" class="rounded-circle"></i>
             </a>
             <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
                 <div class="message-body">
@@ -212,10 +205,29 @@
                     <i class="ti ti-user fs-6"></i>
                     <p class="mb-0 fs-3">My Profile</p>
                 </a>
-                <a href="{{ url('/logout')}}" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                <a id="logoutButton" href="{{ url('/logout')}}" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
                 </div>
             </div>
             </li>
+            <script>
+              document.getElementById('logoutButton').addEventListener('click', function(event) {
+                  event.preventDefault(); // Mencegah tindakan default dari tombol
+                  // Tampilkan pesan konfirmasi menggunakan SweetAlert2
+                  Swal.fire({
+                      title: 'Konfirmasi',
+                      text: 'Apakah Anda yakin ingin keluar?',
+                      icon: 'question',
+                      showCancelButton: true,
+                      confirmButtonText: 'Ya',
+                      cancelButtonText: 'Batal'
+                  }).then((result) => {
+                      if (result.isConfirmed) {
+                          // Redirect ke halaman logout jika pengguna menekan tombol "Ya"
+                          window.location.href = "{{ url('/logout')}}";
+                      }
+                  });
+              });
+          </script>
         </ul>
         </div>
 
