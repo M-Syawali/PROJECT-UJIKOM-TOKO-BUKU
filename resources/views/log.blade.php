@@ -7,11 +7,12 @@
     <div class="card shadow mb-4">
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="myTable" width="100%" cellspacing="0">
+                <table class="table table-bordered" id="myTable" width="100%" cellspacing="0" >
                     <thead>
                         <tr>
                             <th>NO</th>
                             <th>NAMA LENGKAP</th>
+                            <th>Role</th>
                             <th>ACTIVITY</th>
                             <th>TANGGAL</th>
                         </tr>
@@ -21,6 +22,7 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td>{{ $l->nama }}</td>
+                            <td>{{ $l->role }}</td>
                             <td>{{ $l->activity }}</td>
                             <td>{{ $l->created_at }}</td>
                         </tr>

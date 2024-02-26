@@ -8,8 +8,8 @@
                 <div class="col-12 col-lg-12 col-xl-12 border-light">
                     <div class="marquee-container"> <!-- Set the background color here -->
                         <br>
-                        <marquee behavior="scroll" direction="left">
-                            <h4 style="color : #5D87FF;"><strong>Selamat Datang {{ Auth::user()->nama }} Di website Book Store</strong> - <strong> Anda login sebagai {{ Auth::user()->role}}</strong></h4>
+                        <marquee behavior="scroll" direction="right">
+                            <h4 style="color : red;"><strong>Selamat Datang {{ Auth::user()->nama }} Di website Book Store</strong> - <strong> Anda login sebagai {{ Auth::user()->role}}</strong></h4>
                         </marquee>
                     </div>
                 </div>
@@ -35,4 +35,7 @@
     <!-- Content Row -->
     <div class="row">
         <!-- Earnings (Monthly) Card Example -->
+
+
+  
 @endsection

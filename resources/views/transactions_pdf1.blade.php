@@ -34,7 +34,7 @@
             width: 100%;
             border: 1px solid #000000;
             border-collapse: collapse;
-            font-size: 13px; /* Adjust the font size as needed */
+            font-size: 12px; /* Adjust the font size as needed */
         }
 
         th, td {

@@ -36,38 +36,44 @@ class TransactionsR extends Controller
     }
 
     public function store(Request $request)
-{
-    $request->validate([
-        'nomor_unik' => 'required',
-        'nama_pelanggan' => 'required',
-        'products' => 'required|array',
-        'total_harga' => 'required',
-        'uang_bayar' => 'required',
-        'qty' => 'required|array',
-    ]);
+    {
+        $request->validate([
+            'nomor_unik' => 'required',
+            'nama_pelanggan' => 'required',
+            'products' => 'required|array',
+            'total_harga' => 'required',
+            'uang_bayar' => 'required',
+            'qty' => 'required|array',
+        ]);
 
-    $produkId = $request->input('produkId');
-    $qty = $request->input('qty');
+        $produkId = $request->input('produkId');
+        $qty = $request->input('qty');
 
-    // Mengurangi stok produk yang dibeli
-    foreach ($produkId as $index => $id) {
-        $product = ProductsM::find($id);
-        $product->stok -= $qty[$index];
-        $product->save();
+        foreach ($produkId as $index => $id) {
+            $product = ProductsM::find($id);
+            if ($product->stok < $qty[$index]) {
+                return redirect()->back()->withInput()->withErrors(['qty' => 'Qty produk ' . $product->nama_produk . ' melebihi stok yang tersedia']);
+            }
+        }
+
+        // Mengurangi stok produk yang dibeli
+        foreach ($produkId as $index => $id) {
+            $product = ProductsM::find($id);
+            $product->stok -= $qty[$index];
+            $product->save();
+        }
+
+        TransactionsM::create([
+            'nomor_unik' => $request->input('nomor_unik'),
+            'nama_pelanggan' => $request->input('nama_pelanggan'),
+            'products' => $this->prepareProduk($produkId, $qty),
+            'total_harga' => $request->input('total_harga'),
+            'uang_bayar' => $request->input('uang_bayar'),
+            'uang_kembali' => $request->input('uang_bayar') - $request->input('total_harga'),
+        ]);
+
+        return redirect()->route('transactions.index')->with('success', 'Data Transaksi berhasil disimpan');
     }
-
-    TransactionsM::create([
-        'nomor_unik' => $request->input('nomor_unik'),
-        'nama_pelanggan' => $request->input('nama_pelanggan'),
-        'products' => $this->prepareProduk($produkId, $qty),
-        'total_harga' => $request->input('total_harga'),
-        'uang_bayar' => $request->input('uang_bayar'),
-        'uang_kembali' => $request->input('uang_bayar') - $request->input('total_harga'),
-    ]);
-
-    return redirect()->route('transactions.index')->with('success', 'Data Transaksi berhasil disimpan');
-}
-
 
     private function prepareProduk($produkIds, $qtys)
     {
@@ -105,45 +111,46 @@ class TransactionsR extends Controller
     }
 
     public function update(Request $request, string $id)
-{
-    $request->validate([
-        'nomor_unik' => 'required',
-        'products' => 'required|array', // Fix typo here
-        'nama_pelanggan' => 'required',
-        'total_harga' => 'required',
-        'uang_bayar' => 'required',
-        'qty' => 'required|array',
-    ]);
+    {
+        $request->validate([
+            'nomor_unik' => 'required',
+            'products' => 'required|array', // Fix typo here
+            'nama_pelanggan' => 'required',
+            'total_harga' => 'required',
+            'uang_bayar' => 'required',
+            'qty' => 'required|array',
+        ]);
 
-    $produkId = $request->input('produkId');
-    $qty = $request->input('qty');
+        $produkId = $request->input('produkId');
+        $qty = $request->input('qty');
 
-    // Mengembalikan stok produk yang sebelumnya dibeli
-    $transaction = TransactionsM::find($id);
-    foreach ($transaction->products as $product) {
-        $productData = ProductsM::find($product['produkId']);
-        $productData->stok += $product['qty'];
-        $productData->save();
+        // Mengembalikan stok produk yang sebelumnya dibeli
+        $transaction = TransactionsM::find($id);
+        foreach ($transaction->products as $product) {
+            $productData = ProductsM::find($product['produkId']);
+            $productData->stok += $product['qty'];
+            $productData->save();
+        }
+
+        // Mengurangi stok produk yang baru dibeli
+        foreach ($produkId as $index => $id) {
+            $product = ProductsM::find($id);
+            $product->stok -= $qty[$index];
+            $product->save();
+        }
+
+        $transaction->update([
+            'nomor_unik' => $request->input('nomor_unik'),
+            'nama_pelanggan' => $request->input('nama_pelanggan'),
+            'products' => $this->prepareProduk($produkId, $qty),
+            'total_harga' => $request->input('total_harga'),
+            'uang_bayar' => $request->input('uang_bayar'),
+            'uang_kembali' => $request->input('uang_bayar') - $request->input('total_harga'),
+        ]);
+
+        return redirect()->route('transactions.index')->with('success', 'Data Transaksi berhasil disimpan');
     }
 
-    // Mengurangi stok produk yang baru dibeli
-    foreach ($produkId as $index => $id) {
-        $product = ProductsM::find($id);
-        $product->stok -= $qty[$index];
-        $product->save();
-    }
-
-    $transaction->update([
-        'nomor_unik' => $request->input('nomor_unik'),
-        'nama_pelanggan' => $request->input('nama_pelanggan'),
-        'products' => $this->prepareProduk($produkId, $qty),
-        'total_harga' => $request->input('total_harga'),
-        'uang_bayar' => $request->input('uang_bayar'),
-        'uang_kembali' => $request->input('uang_bayar') - $request->input('total_harga'),
-    ]);
-
-    return redirect()->route('transactions.index')->with('success', 'Data Transaksi berhasil disimpan');
-}
     public function destroy(string $id)
     {
         $LogM = LogM::create([

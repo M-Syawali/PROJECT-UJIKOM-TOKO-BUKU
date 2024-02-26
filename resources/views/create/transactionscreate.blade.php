@@ -40,22 +40,27 @@
                                         <select name="products[]" required id="products" class="form-control select2">
                                             <option selected>-Pilih Produk-</option>
                                             @foreach ($products as $p)
-                                            <option value="{{ $p->id }}" data-harga="{{ $p->harga_produk }}" data-jenis="{{ $p->jenis_buku }}">{{ $p->jenis_buku }} - {{ $p->nama_produk }} </option>
+                                            <option value="{{ $p->id }}" data-harga="{{ $p->harga_produk }}" data-stok="{{ $p->stok }}" data-jenis="{{ $p->jenis_buku }}">{{ $p->jenis_buku }} - {{ $p->nama_produk }} - ( {{ $p->stok }} )</option>
                                             @endforeach
                                         </select>
                                         <button type="button" class="btn btn-outline-primary ms-2" onclick="addRow()"><i class="ti ti-plus"></i></button>
                                     </div>
                                 </div>
+                                <!-- Alert stok habis -->
+                                <div id="alertStokHabis" class="alert alert-danger d-none" role="alert">
+                                    Stok produk habis. Silakan pilih produk lain.
+                                </div>
+                                <!-- End of alert stok habis -->
                                 <div class="table-responsive my-3">
                                     <table class="table">
                                         <thead>
                                             <tr>
-                                                <th scope="col">No</th>
-                                                <th scope="col">Nama Produk</th>
-                                                <th scope="col">Harga Produk</th>
-                                                <th scope="col">Qty</th>
-                                                <th scope="col">Total</th>
-                                                <th scope="col">Aksi</th>
+                                                <th>No</th>
+                                                <th>Nama Produk</th>
+                                                <th>Harga Produk</th>
+                                                <th>Qty</th>
+                                                <th>Total</th>
+                                                <th>Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody id="tableBody"></tbody>
@@ -67,12 +72,18 @@
                                 </div>
                                 <div class="mb-3">
                                     <label for="uang_bayar" class="form-label">Uang Bayar</label>
-                                    <input type="number" class="form-control" name="uang_bayar" aria-describedby="emailHelp" oninput="hitungUangKembali()">
+                                    <input type="number" class="form-control" name="uang_bayar" id="uang_bayar" aria-describedby="emailHelp" oninput="hitungUangKembali()">
                                     @error('uang_bayar')
                                     <p>{{ $message }}</p>
                                     @enderror
                                 </div>
-                                <button type="submit" class="btn btn-outline-primary btn-animated">Tambah</button>
+                                <!-- Alert jika uang bayar kurang -->
+                                <div id="alertUangKurang" class="alert alert-danger d-none" role="alert">
+                                    Jumlah uang bayar kurang dari total harga.
+                                </div>
+                                <div class="mb-3">
+                                    <button type="submit" class="btn btn-outline-primary btn-animated">Tambah</button>
+                                </div>
                             </form>
                         </div>
                     </div>
@@ -94,7 +105,7 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
     <script>
-            $(document).ready(function () {
+        $(document).ready(function () {
             // Get the select element and options
             var select = $('#products');
             var options = select.find('option');
@@ -116,25 +127,32 @@
                 select.html(filteredOptions);
             });
         });
-    </script>
-    <script>
- function addRow() {
-        var selectedProduk = $('#products option:selected');
-        var produkName = selectedProduk.text();
-        var produkId = selectedProduk.val();
-        var produkHarga = selectedProduk.data('harga');
-        var qty = selectedProduk.closest('.d-flex').find('.qtyInput').val();
-        
-        // Check if the product already exists in the table
-        var existingProduk = $('#tableBody').find('input[name="produkId[]"][value="' + produkId + '"]').length > 0;
-        if (existingProduk) {
-            Swal.fire(
-                'Produk sudah ditambahkan sebelumnya',
-                'Anda tidak dapat menambahkan produk yang sama lagi.',
-                'warning'
-            );
-            return; // Stop further execution
-        }
+
+        // Function to add row
+        function addRow() {
+            var selectedProduk = $('#products option:selected');
+            var stok = selectedProduk.data('stok');
+            if (stok <= 0) {
+                $('#alertStokHabis').removeClass('d-none');
+                return;
+            }
+            $('#alertStokHabis').addClass('d-none');
+
+            var produkName = selectedProduk.text();
+            var produkId = selectedProduk.val();
+            var produkHarga = selectedProduk.data('harga');
+            var qty = selectedProduk.closest('.d-flex').find('.qtyInput').val();
+            
+            // Check if the product already exists in the table
+            var existingProduk = $('#tableBody').find('input[name="produkId[]"][value="' + produkId + '"]').length > 0;
+            if (existingProduk) {
+                Swal.fire(
+                    'Produk sudah ditambahkan sebelumnya',
+                    'Anda tidak dapat menambahkan produk yang sama lagi.',
+                    'warning'
+                );
+                return; // Stop further execution
+            }
 
             var total = produkHarga * qty;
 
@@ -185,5 +203,22 @@
         $(document).on('input', '.qtyInput', function() {
             updateTotalHarga();
         });
+
+        // Function to calculate uang kembali
+        function hitungUangKembali() {
+            var totalHarga = parseFloat($('#total_harga').val());
+            var uangBayar = parseFloat($('#uang_bayar').val());
+
+            // Check if uang bayar is less than total harga
+            if (uangBayar < totalHarga) {
+                $('#alertUangKurang').removeClass('d-none');
+                // Disable the submit button
+                $('button[type="submit"]').prop('disabled', true);
+            } else {
+                $('#alertUangKurang').addClass('d-none');
+                // Enable the submit button
+                $('button[type="submit"]').prop('disabled', false);
+            }
+        }
     </script>
 @endsection

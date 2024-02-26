@@ -63,7 +63,7 @@
                             <th>NO</th>
                             <th>NOMOR UNIK</th>
                             <th>NAMA PELANGGAN</th>
-                            <th>PRODUK</th>
+                            <th>NAMA PRODUK</th>
                             <th>QTY</th>
                             <th>HARGA SATUAN</th>
                             <th>TOTAL HARGA</th>
@@ -117,9 +117,9 @@
                                         </ul>
                                     @endif 
                                 </td>
-                                <td class="text-center">Rp. {{ number_format($p->total_harga, 0, ',', '.') }}</td>
-                                <td class="text-center">Rp. {{ number_format($p->uang_bayar, 0, ',', '.') }}</td>
-                                <td class="text-center">Rp. {{ number_format($p->uang_kembali, 0, ',', '.') }}</td>
+                                <td>Rp. {{ number_format($p->total_harga, 0, ',', '.') }}</td>
+                                <td>Rp. {{ number_format($p->uang_bayar, 0, ',', '.') }}</td>
+                                <td>Rp. {{ number_format($p->uang_kembali, 0, ',', '.') }}</td>
                                 <td>{{ $p->created_at }}</td>
                             </tr>
                         @endforeach

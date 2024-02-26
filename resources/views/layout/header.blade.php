@@ -43,7 +43,7 @@
               <span class="hide-menu">Home</span>
             </li>
             <li class="sidebar-item">
-              <a class="sidebar-link" href="{{ url('dashboard')}}" aria-expanded="false">
+              <a class="sidebar-link" href="{{ url('dashboard')}}">
                 <span>
                   <i class="ti ti-home"></i>
                 </span>
@@ -67,7 +67,14 @@
               <i class="ti ti-dots nav-small-cap-icon fs-4"></i>
               <span class="hide-menu">Transactions</span>
             </li>
-          
+            <li class="sidebar-item">
+              <a class="sidebar-link" href="{{ url('transactions')}}" aria-expanded="false">
+                <span>
+                <i class="menu-icon ti ti-shopping-cart"></i>
+                </span>
+                <span class="hide-menu">Transactions</span>
+              </a>
+            </li>
             <li class="sidebar-item">
               <a class="sidebar-link" href="{{ url('datapembelian')}}" aria-expanded="false">
                 <span>
@@ -240,6 +247,7 @@
       </div>
     </div>
   </div>
+  
    <div class="py-6 px-6 text-center">
           <p class="mb-0 fs-4">Design and Developed by <a style="color: blue;">Muhamad W. Syawali</a></p>
         </div>

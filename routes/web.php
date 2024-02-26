@@ -63,3 +63,4 @@ Route::get('laporan', [LaporanC::class, 'index'])->name('laporan.index');
 Route::get('/laporan/filter', [LaporanC::class, 'filter'])->name('laporan.filter');
 Route::get('/laporan/export', [LaporanC::class, 'export'])->name('laporan.export');
 
+ 

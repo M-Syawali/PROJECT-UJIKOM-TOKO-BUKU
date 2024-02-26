@@ -1,4 +1,5 @@
 @extends('layout.header')
+
 @section('content')
 <h3 class="h3 mb-0 text-gray-800"><strong>PAGES - EDIT TRANSACTIONS</strong></h3>
 <br>
@@ -64,7 +65,7 @@
                                                 }
                                             @endphp
                                             <option value="{{ $p->id }}" data-harga="{{ $p->harga_produk }}" {{ $isSelected ? 'selected' : '' }}>
-                                                {{ $p->jenis_buku }} - {{ $p->nama_produk }}
+                                                {{ $p->jenis_buku }} - {{ $p->nama_produk }} - ( {{ $p->stok}} )
                                             </option>
                                         @endforeach
                                     </select>
@@ -115,12 +116,15 @@
                                 <!-- Input untuk uang bayar -->
                                 <div class="mb-3">
                                     <label for="uang_bayar" class="form-label">Uang Bayar</label>
-                                    <input type="number" class="form-control" name="uang_bayar"  aria-describedby="emailHelp" oninput="hitungUangKembali()">
+                                    <input type="number" class="form-control" name="uang_bayar" id="uang_bayar" aria-describedby="emailHelp" oninput="hitungUangKembali()">
                                     @error('uang_bayar')
                                     <p>{{ $message }}</p>
                                     @enderror
                                 </div>
-                                
+                                <!-- Alert jika uang bayar kurang -->
+                                <div id="alertUangKurang" class="alert alert-danger d-none" role="alert">
+                                    Jumlah uang bayar kurang dari total harga.
+                                </div>
                                 <!-- Tombol submit -->
                                 <button type="submit" class="btn btn-outline-primary m-1">Edit</button>
                             </form>
@@ -243,6 +247,22 @@
     $(document).on('input', '.qtyInput', function () {
         updateTotalHarga();
     });
+
+    function hitungUangKembali() {
+            var totalHarga = parseFloat($('#total_harga').val());
+            var uangBayar = parseFloat($('#uang_bayar').val());
+
+            // Check if uang bayar is less than total harga
+            if (uangBayar < totalHarga) {
+                $('#alertUangKurang').removeClass('d-none');
+                // Disable the submit button
+                $('button[type="submit"]').prop('disabled', true);
+            } else {
+                $('#alertUangKurang').addClass('d-none');
+                // Enable the submit button
+                $('button[type="submit"]').prop('disabled', false);
+            }
+        }
 
 </script>
 @endsection

@@ -36,7 +36,7 @@
                                     <th>NO</th>
                                     <th>NOMOR UNIK</th>
                                     <th>NAMA PELANGGAN</th>
-                                    <th>PRODUK</th>
+                                    <th>NAMA PRODUK</th>
                                     <th>QTY</th>
                                     <th>HARGA SATUAN</th>
                                     <th>TOTAL HARGA</th>
@@ -89,9 +89,9 @@
                                         </ul>
                                     @endif 
                                 </td>
-                                <td class="text-center">Rp. {{ number_format($p->total_harga, 0, ',', '.') }}</td>
-                                <td class="text-center">Rp. {{ number_format($p->uang_bayar, 0, ',', '.') }}</td>
-                                <td class="text-center">Rp. {{ number_format($p->uang_kembali, 0, ',', '.') }}</td>
+                                <td>Rp. {{ number_format($p->total_harga, 0, ',', '.') }}</td>
+                                <td>Rp. {{ number_format($p->uang_bayar, 0, ',', '.') }}</td>
+                                <td>Rp. {{ number_format($p->uang_kembali, 0, ',', '.') }}</td>
                                 <td>{{ $p->created_at }}</td>
                                     <td>
                                         <div class="d-flex justify-content-center">
@@ -99,6 +99,8 @@
                                             <a href="{{ route('transactions.pdf', $p->id) }}" target="_blank" class="btn btn-outline-warning m-1">
                                                 <i class="ti ti-printer"></i>
                                             </a>
+                                            @endif
+                                            @if (Auth::user()->role == 'admin')
                                             <a href="{{ route('transactions.edit', $p->id) }}" class="btn btn-outline-primary m-1">
                                                 <i class="ti ti-edit"></i>
                                             </a>
